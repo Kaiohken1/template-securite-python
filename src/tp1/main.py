@@ -8,9 +8,9 @@ def main():
 
     capture = Capture("eth0")
     capture.capture_traffic()
-    capture.get_all_protocols()
+    print(capture.get_all_protocols())
     # capture.analyse("tcp")
-    # summary = capture.get_summary()
+    summary = capture.get_summary()
 
     # filename = "report.pdf"
     # report = Report(capture, filename, summary)

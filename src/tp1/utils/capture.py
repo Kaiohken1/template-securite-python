@@ -29,14 +29,20 @@ class Capture:
         Return all protocols captured with total packets number
         """
         protocols = set()
-        self.pktList.show()
         counter: int = 0
         for pkt in self.pktList:
             counter += 1
-            if pkt.haslayer('TCP') and pkt['TCP'].dport == 443:
-                print("HTTPS detected")
-                continue
-            protocols.add(pkt.lastlayer().name)
+            if pkt.haslayer('ARP'):
+                protocols.add(pkt.lastlayer().name)
+            if pkt.haslayer('DNS'):
+                protocols.add(pkt.lastlayer().name)
+            if pkt.haslayer('TCP'):
+                if pkt['TCP'].dport == 80:
+                    protocols.add('HTTP')
+                else:
+                    continue
+        if len(protocols) == 0:
+            protocols.add("Aucun protocole supporté détecté")
         return (protocols, counter)
 
     def analyse(self, protocols: str) -> None:
@@ -59,7 +65,7 @@ class Capture:
         self.summary = self.gen_summary()
 
     def get_summary(self) -> str:
-        return self.summary
+        return self.pktList.summary()
 
     def gen_summary(self) -> str:
         """
