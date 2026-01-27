@@ -6,16 +6,17 @@ from src.tp1.utils.report import Report
 def main():
     logger.info("Starting TP1")
 
-    capture = Capture()
+    capture = Capture("eth0")
     capture.capture_traffic()
-    capture.analyse("tcp")
-    summary = capture.get_summary()
+    capture.get_all_protocols()
+    # capture.analyse("tcp")
+    # summary = capture.get_summary()
 
-    filename = "report.pdf"
-    report = Report(capture, filename, summary)
-    report.generate("graph")
-    report.generate("array")
-    report.save(filename)
+    # filename = "report.pdf"
+    # report = Report(capture, filename, summary)
+    # report.generate("graph")
+    # report.generate("array")
+    # report.save(filename)
 
 
 if __name__ == "__main__":
