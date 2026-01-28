@@ -8,6 +8,7 @@ class Capture:
         self.interface: str = choose_interface()
         self.summary: str = ""
         self.pktList: PacketList = None
+        self.protocols: dict = {}
 
     def capture_traffic(self) -> None:
         """
@@ -19,31 +20,31 @@ class Capture:
 
     def sort_network_protocols(self) -> set:
         """
-        Sort and return all captured network protocols
+        Sort and return all captured network protocols in descending order of packets
         """
-        protocols, _ = self.get_all_protocols()
-        return protocols
+        protocols = self.protocols
+        if not protocols:
+            logger.info("Aucun protocole capturé")
 
-    def get_all_protocols(self) ->tuple[set, int]:
+        return {k: v for k, v in sorted(protocols.items(), key=lambda item: item[1], reverse=True)}
+
+    def get_all_protocols(self) -> None:
         """
         Return all protocols captured with total packets number
         """
-        protocols = set()
-        counter: int = 0
+        protocols = {}
         for pkt in self.pktList:
-            counter += 1
-            if pkt.haslayer('ARP'):
-                protocols.add(pkt.lastlayer().name)
-            if pkt.haslayer('DNS'):
-                protocols.add(pkt.lastlayer().name)
+            if pkt.haslayer('ARP') or pkt.haslayer('DNS') or pkt.haslayer('NTPheader'):
+                name = pkt.lastlayer().name
+                protocols[name] = protocols.get(name, 0) + 1
             if pkt.haslayer('TCP'):
-                if pkt['TCP'].dport == 80:
-                    protocols.add('HTTP')
+                if pkt['TCP'].dport == 80 or pkt['TCP'].dport == 443:
+                    protocols['HTTP'] = protocols.get('HTTP', 0) + 1
                 else:
                     continue
         if len(protocols) == 0:
-            protocols.add("Aucun protocole supporté détecté")
-        return (protocols, counter)
+            logger.info("Aucun protocole supporté détecté")
+        self.protocols = protocols
 
     def analyse(self, protocols: str) -> None:
         """
@@ -62,6 +63,22 @@ class Capture:
         logger.debug(f"All protocols: {all_protocols}")
         logger.debug(f"Sorted protocols: {sort}")
 
+        pkts = list()
+        for pkt in self.pktList:
+            if pkt.lastlayer().name == protocols:
+                pkts.append(pkt)
+        
+        match protocols:
+            case 'HTTP':
+                detection = self._HttpAnalyze(pkts)
+            case 'DNS':
+                detection = self._DnsAnalyze(pkts)
+            case 'ARP':
+                detection = self._ArpAnalyze(pkts)
+        
+        if not detection:
+            logger.info('Aucune attaque relevée')
+
         self.summary = self.gen_summary()
 
     def get_summary(self) -> str:
@@ -73,3 +90,20 @@ class Capture:
         """
         summary = ""
         return summary
+
+    def _HttpAnalyze(pkts: list) -> bool:
+        SQL_PATTERNS = ['OR 1=1', '"--']
+        for pkt in pkts:
+            if pkt.haslayer('Raw'):
+                payload = pkt['Raw'].load
+                payload_str = payload.decode('utf-8', errors='ignore')
+                if any(pattern in payload_str for pattern in SQL_PATTERNS):
+                    logger.info('Tentative d\'attaque repérée !')
+                    logger.info(f"HTTP - IP Source: {pkt['IP'].src}, IP Destinataire : {pkt['IP'].src}")
+        False
+    
+    def _DnsAnalyze(pkts: list) -> bool:
+        False
+    
+    def _ArpAnalyze(pkts: list) -> bool:
+        False
