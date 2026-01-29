@@ -4,6 +4,7 @@ from src.tp2.utils.capstone import Capstone
 from google import genai
 from dotenv import load_dotenv
 import time
+from markdown_pdf import MarkdownPdf, Section
 
 def main():
     load_dotenv()
@@ -51,12 +52,12 @@ def main():
         model="gemini-2.5-flash", contents=[prompt, contexte_malware]
     )
     
-    rapport_md = response.text
+    timestr = time.strftime("%d-%m-%Y_%H-%M")    
+    nom_fichier = f"rapport_analyse_shellcode_{timestr}"
 
-    timestr = time.strftime("%d/%m/%Y-%H:%M")
-    nom_fichier = f"rapport_analyse_shellcode_{timestr}.md"
+    pdf = MarkdownPdf()
+    pdf.meta["title"] = 'Analyse Shellcode'
+    pdf.add_section(Section(response.text, toc=False))
+    pdf.save(f'{nom_fichier}.pdf')
 
-    with open(nom_fichier, "w", encoding="utf-8") as f:
-        f.write(rapport_md)
-
-    print(f"Rapport Markdown généré : {nom_fichier}")
+    print(f"Rapport généré : {nom_fichier}")
