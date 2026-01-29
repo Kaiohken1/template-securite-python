@@ -8,3 +8,5 @@ __pycache__/
 *.sqlite3
 report.pdf
 app.log
+.env
+*.md

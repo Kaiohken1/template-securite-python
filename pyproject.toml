@@ -20,6 +20,8 @@ fpdf2 = "^2.8.1"
 pytest = "^8.3.5"
 capstone = "^5.0.6"
 pylibemu = "^1.0"
+dotenv = "^0.9.9"
+google-genai = "^1.60.0"
 
 [build-system]
 requires = ["poetry-core"]

@@ -16,9 +16,6 @@ class Strings:
                     current = ""
         
         if not strings:
-            logger.info("Aucun string trouvé")
-            return
+            return "Aucun string trouvé"
 
-        logger.info("Strings :")
-        for string in strings:
-            logger.info(string)
+        return strings
