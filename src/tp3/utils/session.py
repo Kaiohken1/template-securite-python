@@ -28,7 +28,8 @@ class Session:
         """
         Prepares the request for sending by capturing and solving the captcha.
         """
-        captcha = Captcha(self.url)
+        captcha_url = "http://31.220.95.27:9002/captcha.php"
+        captcha = Captcha(captcha_url)
         captcha.capture()
         captcha.solve()
 

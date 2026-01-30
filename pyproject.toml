@@ -23,6 +23,7 @@ pylibemu = "^1.0"
 dotenv = "^0.9.9"
 google-genai = "^1.60.0"
 markdown-pdf = "^1.10"
+pytesseract = "^0.3.13"
 
 [build-system]
 requires = ["poetry-core"]

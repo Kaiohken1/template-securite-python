@@ -1,6 +1,6 @@
 from src.tp3.utils.config import logger
 from src.tp3.utils.session import Session
-
+from src.tp3.utils.captcha import Captcha
 
 def main():
     logger.info("Starting TP3")
