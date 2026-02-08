@@ -1,7 +1,8 @@
 from src.tp3.utils.captcha import Captcha
 from src.tp3.utils.config import logger
-import requests
 from bs4 import BeautifulSoup
+import requests
+from requests import Response
 
 class Session:
     """
@@ -14,49 +15,55 @@ class Session:
         valid_flag (str): The valid flag obtained after processing the response.
     """
 
-    def __init__(self, url):
+    def __init__(self, url: str) -> None:
         """
         Initializes a new session with the given URL.
 
         Args:
             url (str): The URL of the captcha.
         """
-        self.url = url
-        self.captcha_value = ""
-        self.flag_value = 1000
-        self.valid_flag = ""
+        self.url: str = url
+        self.captcha_value: str = ""
+        self.flag_value: int = 1000
+        self.valid_flag: str = ""
         self.session = requests.Session()
 
     def prepare_request(self):
         """
         Prepares the request for sending by capturing and solving the captcha.
         """
-        captcha_url = "http://31.220.95.27:9002/captcha.php"
-        captcha = Captcha(captcha_url, session=self.session)
+        captcha_url: str = "http://31.220.95.27:9002/captcha.php"
+        captcha: Captcha = Captcha(captcha_url, session=self.session)
         captcha.capture()
         captcha.solve()
 
         self.captcha_value = captcha.get_value()
         self.session.cookies.get('PHPSESSID')
         
-    def submit_request(self):
+    def submit_request(self) -> Response:
         """
         Sends the flag and captcha.
+
+        Returns:
+            response (Response) : The response recived for the submited request
         """
-        data = {
+        data: dict = {
             'flag' : self.flag_value,
             'captcha' : self.captcha_value,
             'submit' : "Envoyer"
         }
         logger.info(f"Flag : {data['flag']}, Captcha : {data['captcha']}")
-        response = self.session.post(self.url, data=data)
+        response: Response = self.session.post(self.url, data=data)
         return response
 
     def process_response(self, response: requests.Response) -> bool :
         """
-        Processes the response.
+        Processes the response and parse the valid flag when captured.
+
+        Args:
+            response (Response) : The response recived for the submited request
         """
-        soup = BeautifulSoup(response.text, 'html.parser')
+        soup: BeautifulSoup = BeautifulSoup(response.text, 'html.parser')
         
         tagSuccess = soup.find('p', class_='alert-success')
 
