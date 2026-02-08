@@ -4,27 +4,32 @@ from PIL import Image
 from pytesseract import image_to_string
 
 class Captcha:
-    def __init__(self, url):
+    def __init__(self, url, session):
         self.url = url
         self.image = ""
         self.value = ""
+        self.session = session
 
     def solve(self):
         """
         Fonction permettant la résolution du captcha.
         """
-        self.value = self.get_value()
+        img = Image.open('captcha.png')
+        text = image_to_string(img)
+        if len(text) <= 0:
+            logger.info("Erreur lors de la récupération de la valeur du captcha")
+            return ""
+        self.value = text
 
     def capture(self):
         """
         Fonction permettant la capture du captcha.
         """
-        response = requests.get(self.url)
-
+        response = self.session.get(self.url)
         if response.status_code == 200:
             with open("captcha.png", "wb") as f:
                 f.write(response.content)
-                logger.info(f"Captcha téléchargé avec succès.")
+            self.image = 'captcha.png'
         else:
             logger.info(f"Erreur : {response.status_code}")
 
@@ -33,9 +38,4 @@ class Captcha:
         """
         Fonction retournant la valeur du captcha
         """
-        img = Image.open('captcha.png')
-        text = image_to_string(img)
-        if len(text) != 0:
-            logger.info("Erreur lors de la récupération de la valeur du captcha")
-            return ""
-        return text
+        return self.value

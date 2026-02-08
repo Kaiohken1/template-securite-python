@@ -12,12 +12,16 @@ def main():
         url = challenges[i]
         session = Session(url)
         session.prepare_request()
-        session.submit_request()
+        response = session.submit_request()
 
-        while not session.process_response():
+        while not session.process_response(response) and session.flag_value < 2000:
             session.prepare_request()
-            session.submit_request()
+            response = session.submit_request()
 
+        if session.flag_value > 2000:
+            logger.info("Could not solve {url} after 2000 attemps")
+            return
+    
         logger.info("Smell good !")
         logger.info(f"Flag for {url} : {session.get_flag()}")
 
