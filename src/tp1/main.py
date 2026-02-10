@@ -1,6 +1,7 @@
 from src.tp1.utils.capture import Capture
 from src.tp1.utils.config import logger
 from src.tp1.utils.report import Report
+import time
 
 
 def main():
@@ -10,14 +11,15 @@ def main():
     capture.capture_traffic()
     capture.get_all_protocols()
     print(capture.sort_network_protocols())
-    # capture.analyse("tcp")
+    capture.analyse("HTTP")
     summary = capture.get_summary()
 
-    # filename = "report.pdf"
-    # report = Report(capture, filename, summary)
-    # report.generate("graph")
-    # report.generate("array")
-    # report.save(filename)
+    print(summary)
+    filename = "report.md"
+    report = Report(capture, filename, summary)
+    report.generate("graph")
+    report.generate("array")
+    report.save()
 
 
 if __name__ == "__main__":
