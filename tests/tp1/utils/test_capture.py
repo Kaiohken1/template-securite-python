@@ -9,6 +9,18 @@ def test_capture_init():
     # Then
     assert capture.interface == ""
     assert capture.summary == ""
+    assert capture.pktList == None
+    assert capture.protocols == {}
+
+def test_capture_init_with_interface():
+    # When
+    capture = Capture("eth0")
+
+    # Then
+    assert capture.interface == "eth0"
+    assert capture.summary == ""
+    assert capture.pktList == None
+    assert capture.protocols == {}
 
 
 def test_capture_trafic():
@@ -20,7 +32,7 @@ def test_capture_trafic():
 
     # Then
     # This is a minimal test since the method doesn't do much yet
-    assert capture.interface == ""
+    assert len(capture.pktList) > 0
 
 
 def test_sort_network_protocols():
@@ -30,19 +42,35 @@ def test_sort_network_protocols():
     # When
     result = capture.sort_network_protocols()
 
+    result_values = list(result.values())
     # Then
-    assert result is None  # Method currently returns None
+    assert result is not None
+    if (len(result) >= 2):
+        assert result_values[0] > result_values[1]
+
+def test_sort_network_protocols_with_data():
+    capture = Capture()
+    capture.protocols = {
+        "ARP": 10,
+        "DNS": 3,
+    }
+
+    result = capture.sort_network_protocols()
+    values = list(result.values())
+
+    assert values[0] == 10
+    assert values[1] == 3
 
 
 def test_get_all_protocols():
     # Given
     capture = Capture()
-
+    capture.capture_traffic()
     # When
     result = capture.get_all_protocols()
 
     # Then
-    assert result is None  # Method currently returns None
+    assert result is not None
 
 
 def test_analyse():
@@ -84,5 +112,6 @@ def test_gen_summary():
     # When
     result = capture.gen_summary()
 
+
     # Then
-    assert result == ""  # Method currently returns empty string
+    assert result == capture.summary

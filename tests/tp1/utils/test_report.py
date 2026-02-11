@@ -7,9 +7,10 @@ def test_report_init():
     capture = MagicMock()
     filename = "test.pdf"
     summary = "Test summary"
+    title = "TITRE DU RAPPORT"
 
     # When
-    report = Report(capture, filename, summary)
+    report = Report(capture, filename, summary, title)
 
     # Then
     assert report.capture == capture

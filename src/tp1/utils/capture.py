@@ -25,7 +25,7 @@ class Capture:
         protocols = self.protocols
         if not protocols:
             logger.info("Aucun protocole capturé")
-
+            return {}
         return dict(sorted(protocols.items(), key=lambda item: item[1], reverse=True))
 
     def get_all_protocols(self) -> dict:
@@ -44,6 +44,7 @@ class Capture:
 
         if len(protocols) == 0:
             logger.info("Aucun protocole supporté détecté")
+            return {}
 
         self.protocols = protocols
         return protocols
@@ -87,6 +88,7 @@ class Capture:
         summary = "Résumé de la capture:\n"
         for proto, count in self.protocols.items():
             summary += f"- {proto} : {count} paquets\n"
+        self.summary = summary
         return summary
 
     def _HttpAnalyze(self, pkts: list) -> bool:

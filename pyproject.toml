@@ -24,6 +24,7 @@ dotenv = "^0.9.9"
 google-genai = "^1.60.0"
 markdown-pdf = "^1.10"
 pytesseract = "^0.3.13"
+bs4 = "^0.0.2"
 
 [build-system]
 requires = ["poetry-core"]
